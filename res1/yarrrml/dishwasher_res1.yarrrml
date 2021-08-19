@@ -1,0 +1,144 @@
+prefixes:
+  interconnect: "https://interconnectproject.eu/example/"
+  saref: "https://saref.etsi.org/core/"
+  om: "http://www.wurvoc.org/vocabularies/om-1.8/"
+sources:
+  data1:
+    access: OPSD_household_subset.csv
+    referenceFormulation: csv
+    delimiter: ','
+mappings:
+  device:
+    sources: data1
+    s: interconnect:OPSDres1_DW #URI for the Device
+    po:
+      - [a, saref:Appliance] # type of device (default saref:Device, but can be more specific)
+      - p: saref:accomplishes
+        o:
+          mapping: task
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:hasFunction
+        o:
+          mapping: function
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:makesMeasurement
+        o:
+          mapping: measurement
+          condition: #make sure the measurement is only connected to the correct device, multiple condition functions can be used if it is required
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:measuresProperty
+        o:
+          mapping: property
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+  measurement:
+    sources: data1
+    s: interconnect:measurement_OPSDres1_DW_$(utc_timestamp) #URI for the Measurement
+    po:
+      - [a, saref:Measurement] # the type is measurement, there are no sub-classes here
+      - [saref:hasValue, $(DE_KN_residential1_dishwasher), xsd:double]
+      - [saref:isMeasuredIn, om:kilowatt_hour~iri]
+      - [saref:hasTimestamp, $(utc_timestamp), xsd:dateTime]
+      - p: saref:isMeasurementOf
+        o: 
+          mapping: featureOfInterest
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:relatesToProperty
+        o: 
+          mapping: property
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:measurementMadeBy
+        o: 
+          mapping: device
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+  featureOfInterest:
+    sources: data1
+    s: interconnect:featureOfInterest_DE_KN_residential1
+    po:
+      - [a, saref:FeatureOfInterest]
+      - p: saref:hasProperty
+        o:
+          mapping: property
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:hasMeasurement
+        o:
+          mapping: measurement
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+  property:
+    sources: data1
+    s: saref:Power
+    po:
+      - [a, saref:Property]
+      - p: saref:isPropertyOf
+        o:
+          mapping: featureOfInterest
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+      - p: saref:isMeasuredByDevice
+        o:
+          mapping: device
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+  task:
+    sources: data1
+    s: saref:Washing # (default saref:Task)
+    po:
+      - [a, saref:Task]
+      - p: saref:isAccomplishedBy
+        o:
+          mapping: device
+          condition:
+            function: equal
+            parameters:
+              - [str1, $(utc_timestamp), s]
+              - [str2, $(utc_timestamp), o]
+  function:
+    sources: data1
+    s: saref:MeteringFunction # (default saref:Function)
+    po:
+      - [a, saref:Function]
+  unitOfMeasurement:
+    sources: data1
+    s: om:kilowatt_hour
+    po:
+      - [a, saref:unitOfMeasurement]
