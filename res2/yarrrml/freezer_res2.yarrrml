@@ -50,7 +50,7 @@ mappings:
     s: interconnect:measurement_OPSDres2_FR_$(utc_timestamp) #URI for the Measurement
     po:
       - [a, saref:Measurement] # the type is measurement, there are no sub-classes here
-      - [saref:hasValue, $(DE_KN_residential2_washing_machine), xsd:double]
+      - [saref:hasValue, $(DE_KN_residential2_freezer), xsd:double]
       - [saref:isMeasuredIn, om:kilowatt_hour~iri]
       - [saref:hasTimestamp, $(utc_timestamp), xsd:dateTime]
       - p: saref:isMeasurementOf
